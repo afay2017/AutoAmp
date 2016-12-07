@@ -1,11 +1,11 @@
     #include <Arduino.h>
-    #include "Channel.ino"
+    #include <AmpChannel.ino>
 
-Channel channel1;
+//Channel channel1;
 
 void setup() {
   // put your setup code here, to run once:
-  channel1 = new Channel(1);
+  AmpChannel channel1 = new AmpChannel();
 }
 
 void loop() {
