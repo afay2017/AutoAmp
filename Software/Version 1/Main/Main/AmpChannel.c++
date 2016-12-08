@@ -2,13 +2,13 @@ class AmpChannel
 {
 private:
   int channel;
-  int head;
+  bool Pihrana;
   bool mesaEffects;
   bool headEffects;
 public:
   AmpChannel(int channelNumber);
   void setAmpChannel(int channel);
-  void setHead(int head);
+  void setHead(bool Pihrana);
   void setMesaEffects(bool on);
   void setHeadEffects(bool on);
   bool getMesaEffects();
@@ -17,28 +17,37 @@ public:
 
 AmpChannel::AmpChannel(int channelNumber)
 {
-  channel = channelNumber;
+ this->channel = channelNumber;
 }
-
 
 void AmpChannel::setAmpChannel(int channelNumber)
 {
- channel = channelNumber;
+ this->channel = channelNumber;
 }
 
 void AmpChannel::setMesaEffects(bool on)
 {
- mesaEffects = on;
-}
-
-void AmpChannel::setHeadEffects(bool on)
-{
- headEffects = on;
+ this->mesaEffects = on;
 }
 
 bool AmpChannel::getMesaEffects()
 {
  return (bool)mesaEffects;
+}
+
+void AmpChannel::setHeadEffects(bool on)
+{
+ this->headEffects = on;
+}
+
+bool AmpChannel::getHeadEffects()
+{
+ return (bool)headEffects;
+}
+
+void AmpChannel::setHead(bool Pihrana)
+{
+ this->Pihrana = Pihrana;
 }
 
 bool AmpChannel::getHeadEffects()
