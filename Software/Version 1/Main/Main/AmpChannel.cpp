@@ -12,6 +12,9 @@ private:
   int mesaEffectsPin = 1;
   int headEffectsPin = 1;
   int leadPin = 1;
+  int ch2Pin = 1;
+  int ch3Pin = 1;
+  int soloPin = 1;
 public:
   AmpChannel(int channelNumber);
   void setAmpChannel(int channel);
@@ -41,6 +44,10 @@ AmpChannel::AmpChannel(int channelNumber)
  pinMode(mesaEffectsPin,OUTPUT);
  pinMode(headEffectsPin,OUTPUT);
  pinMode(leadPin,OUTPUT);
+ pinMode(ch2Pin,OUTPUT);
+ pinMode(ch3Pin,OUTPUT);
+ pinMode(soloPin,OUTPUT);
+
 }
 
 void AmpChannel::setAmpChannel(int channelNumber)
