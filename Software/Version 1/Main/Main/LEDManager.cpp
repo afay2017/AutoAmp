@@ -14,6 +14,12 @@ private:
 public:
   void setChannel(int channel);
   void setHead(int head);
+  void setMesaEffects(bool on);
+  bool getMesaEffects();
+  void setHeadEffects(bool on);
+  bool getHeadEffects();
+  bool getHead();
+
 };
 
 void LEDManager::setMesaEffects(bool on)

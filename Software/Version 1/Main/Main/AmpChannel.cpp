@@ -7,6 +7,7 @@ private:
   bool lead;
   bool mesaEffects;
   bool headEffects;
+  bool bypass;
 
   double gain;
   double blend;
@@ -14,19 +15,24 @@ private:
   double volume;
 
 public:
+  AmpChannel();
   AmpChannel(int channelNumber);
-  void setAmpChannel(int channel);
+  void setAmpChannelNumber(int channel);
+  int getAmpChannelNumber();
   void setHead(int head);
   int getHead();
   void setLead(bool on);
   bool getLead();
   void setMesaEffects(bool on);
-  void setHeadEffects(bool on);
   bool getMesaEffects();
+  void setHeadEffects(bool on);
   bool getHeadEffects();
-  const static int ORANGE;
-  const static int CRUNCH;
-  const static int LEAD;
+  void setBypass(bool on);
+  bool getBypass();
+  int getBypassInt();
+  const static int ORANGE = 1;
+  const static int CRUNCH = 2;
+  const static int LEAD   = 3;
 
   void setGain(double value);
   void setBlend(double value);
@@ -52,9 +58,9 @@ public:
 
 };
 
-const int AmpChannel::ORANGE = 0;
-const int AmpChannel::CRUNCH = 1;
-const int AmpChannel::LEAD   = 2;
+// const int AmpChannel::ORANGE = 0;
+// const int AmpChannel::CRUNCH = 1;
+// const int AmpChannel::LEAD   = 2;
 
 AmpChannel::AmpChannel(int channelNumber)
 {
@@ -69,10 +75,24 @@ AmpChannel::AmpChannel(int channelNumber)
  // pinMode(soloPin,OUTPUT);
 
 }
-
-void AmpChannel::setAmpChannel(int channelNumber)
+AmpChannel::AmpChannel()
 {
+ this->channel = 1;
+}
+
+void AmpChannel::setAmpChannelNumber(int channelNumber)
+{
+  if (channelNumber > 3){
+    channelNumber = 3;
+  } else if( channelNumber < 1){
+    channelNumber = 1;
+  }
  this->channel = channelNumber;
+}
+
+int AmpChannel::getAmpChannelNumber()
+{
+ return (int)channel;
 }
 
 void AmpChannel::setMesaEffects(bool on)
@@ -93,6 +113,21 @@ void AmpChannel::setHeadEffects(bool on)
 bool AmpChannel::getHeadEffects()
 {
  return (bool)headEffects;
+}
+
+void AmpChannel::setBypass(bool on)
+{
+ this->bypass = on;
+}
+
+bool AmpChannel::getBypass()
+{
+ return (bool)bypass;
+}
+
+int AmpChannel::getBypassInt()
+{
+ return (int)bypass;
 }
 
 void AmpChannel::setHead(int head)
