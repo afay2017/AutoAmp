@@ -55,3 +55,7 @@ void applyMesaChannelPins(int channel){
     break;
   }
 }
+
+void moveSlidePot(int pot, double target){
+
+}
