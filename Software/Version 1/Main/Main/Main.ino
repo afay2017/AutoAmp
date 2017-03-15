@@ -1,9 +1,19 @@
     #include <Arduino.h>
     #include <AmpChannel.cpp>
+    #include <Servo.h>
 
  AmpChannel curChannel;
  AmpChannel channel1;
  AmpChannel channel2;
+
+ Servo gainServoORANGE;
+ Servo volServoORANGE;
+ Servo toneServoORANGE;
+
+ Servo gainServoPIHRANA;
+ Servo volServoPIHRANA;
+ Servo toneServoPIHRANA;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -12,13 +22,16 @@ void setup() {
   channel1 = new AmpChannel(2);
 
   channel1.setHead(curChannel.ORANGE);
-  channel2.setHead(curChannel.ORANGE);
+  channel2.setHead(curChannel.CRUNCH);
 
   channel1.setMesaEffects(false);
   channel2.setMesaEffects(false);
 
   channel1.setHeadEffects(true);
   channel2.setHeadEffects(true);
+
+  channel1.setGain(1);
+  channel2.setGain(100);
 
 
 
@@ -32,12 +45,19 @@ void setup() {
   pinMode(curChannel.headEffectsPin,OUTPUT);
   pinMode(curChannel.mesaEffectsPin,OUTPUT);
 
+  gainServoORANGE.attach(curChannel.gainServoPinORANGE);
+  volServoORANGE.attach(curChannel.volServoPinORANGE);
+  toneServoORANGE.attach(curChannel.toneServoPinORANGE);
+
+  gainServoPIHRANA.attach(curChannel.gainServoPinPIHRANA);
+  volServoPIHRANA.attach(curChannel.volServoPinPIHRANA);
+  toneServoPIHRANA.attach(curChannel.toneServoPinPIHRANA);
 
   //Serial.println("OFF");
 }
 
 void loop() {
-  if (digitalRead(8)==HIGH){
+  if (digitalRead(8)==1){
     //digitalWrite(curChannel.bypassPin, LOW);
     curChannel = channel1;
     applyPins();
@@ -48,11 +68,14 @@ void loop() {
     //Serial.println("ON");
     //digitalWrite(curChannel.bypassPin, HIGH);
   }
+
+  Serial.println(digitalRead(8));
+  applyServo();
 }
 
 void applyPins(){
   //digitalWrite(curChannel.bypassPin,curChannel.getBypassInt());
-  Serial.println(curChannel.getHead());
+  //Serial.println(curChannel.getHead());
   switch (curChannel.getHead()){
     case curChannel.ORANGE:
     digitalWrite(curChannel.headPin, LOW);
@@ -75,6 +98,13 @@ void applyPins(){
   digitalWrite(curChannel.mesaEffectsPin,curChannel.getMesaEffects());
 
 //  applyMesaChannelPins(curChannel.getAmpChannelNumber());
+
+}
+
+void applyServo(){
+
+  gainServoORANGE.write(curChannel.getGain());
+  Serial.println(curChannel.getGain());
 
 }
 

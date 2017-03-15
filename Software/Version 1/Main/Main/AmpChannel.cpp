@@ -153,6 +153,14 @@ public:
   int ch3Pin = 1;
   int soloPin = 1;
 
+  int gainServoPinORANGE = 2;
+  int volServoPinORANGE = 3;
+  int toneServoPinORANGE = 4;
+
+  int gainServoPinPIHRANA = 5;
+  int volServoPinPIHRANA = 6;
+  int toneServoPinPIHRANA = 7;
+
 };
 
 // const int AmpChannel::ORANGE = 0;
