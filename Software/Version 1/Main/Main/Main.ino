@@ -1,6 +1,12 @@
     #include <Arduino.h>
     #include <AmpChannel.cpp>
     #include <Servo.h>
+    #include <elapsedMillis.h>
+
+    elapsedMillis timer0;
+
+    #define interval 750
+    // the interval in mS
 
  AmpChannel curChannel;
  AmpChannel channel1;
@@ -15,11 +21,15 @@
  Servo toneServoPIHRANA;
 
 
+ int slidePotOffset;
+ bool moving;
+
+
 void setup() {
   // put your setup code here, to run once:
   curChannel = new AmpChannel((int)1);
   channel1 = new AmpChannel(1);
-  channel1 = new AmpChannel(2);
+  channel2 = new AmpChannel(2);
 
   channel1.setHead(curChannel.ORANGE);
   channel2.setHead(curChannel.CRUNCH);
@@ -30,7 +40,7 @@ void setup() {
   channel1.setHeadEffects(true);
   channel2.setHeadEffects(true);
 
-  channel1.setGain(1);
+  channel1.setGain(5);
   channel2.setGain(100);
 
 
@@ -45,6 +55,11 @@ void setup() {
   pinMode(curChannel.headEffectsPin,OUTPUT);
   pinMode(curChannel.mesaEffectsPin,OUTPUT);
 
+  pinMode(curChannel.gainPotPin,INPUT);
+
+  pinMode(curChannel.gainMotorLPin,OUTPUT);
+  pinMode(curChannel.gainMotorRPin,OUTPUT);
+
   gainServoORANGE.attach(curChannel.gainServoPinORANGE);
   volServoORANGE.attach(curChannel.volServoPinORANGE);
   toneServoORANGE.attach(curChannel.toneServoPinORANGE);
@@ -53,23 +68,39 @@ void setup() {
   volServoPIHRANA.attach(curChannel.volServoPinPIHRANA);
   toneServoPIHRANA.attach(curChannel.toneServoPinPIHRANA);
 
+  timer0 = 0;
+
+  slidePotOffset = 1;
   //Serial.println("OFF");
 }
 
 void loop() {
-  if (digitalRead(8)==1){
-    //digitalWrite(curChannel.bypassPin, LOW);
-    curChannel = channel1;
-    applyPins();
-    //Serial.println("OFF");
+
+if(digitalRead(8) == 1){
+  setChannel(1);
+} else {
+  setChannel(2);
+}
+
+
+
+freezeSlidePots();
+
+  if (moving){
+    moveSlidePots();
   } else {
-    curChannel = channel2;
-    applyPins();
-    //Serial.println("ON");
-    //digitalWrite(curChannel.bypassPin, HIGH);
+    freezeSlidePots();
+    curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
   }
 
-  Serial.println(digitalRead(8));
+  if(timer0 > interval){
+    timer0 = 0;
+    moving = false;
+  }
+
+
+  //Serial.println(digitalRead(8));
+  //Serial.println(analogRead(curChannel.gainPotPin)/5.68);
   applyServo();
 }
 
@@ -79,13 +110,13 @@ void applyPins(){
   switch (curChannel.getHead()){
     case curChannel.ORANGE:
     digitalWrite(curChannel.headPin, LOW);
-    Serial.println("ORANGE");
+    //Serial.println("ORANGE");
     break;
 
     case curChannel.CRUNCH:
     digitalWrite(curChannel.headPin, HIGH);
     digitalWrite(curChannel.leadPin, LOW);
-    Serial.println("CRUNCH");
+    //Serial.println("CRUNCH");
     break;
 
     case curChannel.LEAD:
@@ -99,12 +130,14 @@ void applyPins(){
 
 //  applyMesaChannelPins(curChannel.getAmpChannelNumber());
 
+
+
 }
 
 void applyServo(){
 
   gainServoORANGE.write(curChannel.getGain());
-  Serial.println(curChannel.getGain());
+  //Serial.println(curChannel.getGain());
 
 }
 
@@ -125,6 +158,46 @@ void applyMesaChannelPins(int channel){
   }
 }
 
-void moveSlidePot(int pot, double target){
+void moveSlidePots(){
+  if (analogRead(curChannel.gainPotPin)/5.68 > curChannel.getGain() + slidePotOffset){
+    //Serial.println("L");
+    digitalWrite(curChannel.gainMotorLPin,1);
+    digitalWrite(curChannel.gainMotorRPin,0);
+  } else if (analogRead(curChannel.gainPotPin)/5.68 < curChannel.getGain() - slidePotOffset){
+    digitalWrite(curChannel.gainMotorLPin,0);
+    digitalWrite(curChannel.gainMotorRPin,1);
+    //Serial.println("R");
+  } else {
+    digitalWrite(curChannel.gainMotorLPin,0);
+    digitalWrite(curChannel.gainMotorRPin,0);
+    //Serial.println("N");
+  }
+}
+void freezeSlidePots(){
+    digitalWrite(curChannel.gainMotorLPin,0);
+    digitalWrite(curChannel.gainMotorRPin,0);
+}
 
+void setChannel(int channel){
+  Serial.println(channel);
+  switch (channel){
+  case 1:
+    if (curChannel.getAmpChannelNumber() != channel1.getAmpChannelNumber()){
+      channel2 = curChannel;
+      timer0 = 0;
+      moving = true;
+    }
+    curChannel = channel1;
+    applyPins();
+    break;
+  case 2:
+    if (curChannel.getAmpChannelNumber() != channel2.getAmpChannelNumber()){
+      channel1 = curChannel;
+      timer0 = 0;
+      moving = true;
+    }
+    curChannel = channel2;
+    applyPins();
+    break;
+  }
 }

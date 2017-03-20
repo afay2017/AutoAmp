@@ -161,6 +161,24 @@ public:
   int volServoPinPIHRANA = 6;
   int toneServoPinPIHRANA = 7;
 
+  int gainPotPin = A4;
+  int volPotPin = A5;
+  int tonePotPin = A6;
+  int blendPotPin = A7;
+
+  int gainMotorLPin = 27;
+  int gainMotorRPin = 26;
+
+  int volMotorLPin = 1;
+  int volMotorRPin = 1;
+
+  int toneMotorLPin = 1;
+  int toneMotorRPin = 1;
+
+  int blendMotorLPin = 1;
+  int blendMotorRPin = 1;
+
+
 };
 
 // const int AmpChannel::ORANGE = 0;
