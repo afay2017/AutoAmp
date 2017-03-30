@@ -23,7 +23,13 @@
 
  int slidePotOffset;
  bool moving;
+ int ch12SwitchPin;
+ int ch23SwitchPin;
+ int bypassSwitchPin;
 
+ int ampSwitchState;
+ int mesaEffectsSwitchState;
+ int headEffectsSwitchState;
 
 void setup() {
   // put your setup code here, to run once:
@@ -44,6 +50,10 @@ void setup() {
   channel2.setGain(100);
 
 
+  for (int i = 0; i < 55; i++) {
+    pinMode(i,INPUT);
+  }
+
 
   Serial.begin(9600);
 
@@ -59,6 +69,11 @@ void setup() {
 
   pinMode(curChannel.gainMotorLPin,OUTPUT);
   pinMode(curChannel.gainMotorRPin,OUTPUT);
+
+  pinMode(curChannel.ampSwitchPin,INPUT);
+  pinMode(curChannel.mesaEffectsPin,INPUT);
+  pinMode(curChannel.mesaEffectsPin,INPUT);
+
 
   gainServoORANGE.attach(curChannel.gainServoPinORANGE);
   volServoORANGE.attach(curChannel.volServoPinORANGE);
@@ -201,3 +216,26 @@ void setChannel(int channel){
     break;
   }
 }
+
+  void checkSwitches(){
+    if(digitalRead(curChannel.ampSwitchPin)==1 && ampSwitchState != 1){
+        ampSwitchState = 1;
+        curChannel.incHead();
+    } else if(digitalRead(curChannel.ampSwitchPin) == 0){
+      ampSwitchState = 0;
+    }
+
+    if(digitalRead(curChannel.headEffectsSwitchPin)==1 && headEffectsSwitchState != 1){
+        ampSwitchState = 1;
+        curChannel.incHead();
+    } else if(digitalRead(curChannel.headEffectsSwitchPin) == 0){
+      ampSwitchState = 0;
+    }
+
+    if(digitalRead(curChannel.mesaEffectsSwitchPin)==1 && mesaEffectsSwitchState != 1){
+        ampSwitchState = 1;
+        curChannel.incHead();
+    } else if(digitalRead(curChannel.mesaEffectsSwitchPin) == 0){
+      ampSwitchState = 0;
+    }
+  }

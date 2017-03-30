@@ -81,8 +81,15 @@ public:
    return (int)bypass;
   }
 
+  void incHead(){
+    setHead(head+1);
+  }
+
   void setHead(int head)
   {
+    if (head > 3){
+      head = 1;
+    }
    this->head = head;
    // switch (head){
    //   case ORANGE:
@@ -175,9 +182,12 @@ public:
   int toneMotorLPin = 1;
   int toneMotorRPin = 1;
 
-  int blendMotorLPin = 1;
+  int blendMotorLPin = 1;3
   int blendMotorRPin = 1;
 
+  int ampSwitchPin = -1;
+  int mesaEffectsSwitchPin = -1;
+  int headEffectsSwitchPin = -1;
 
 };
 
