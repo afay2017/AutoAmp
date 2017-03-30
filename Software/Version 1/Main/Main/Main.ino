@@ -106,6 +106,8 @@ freezeSlidePots();
   } else {
     freezeSlidePots();
     curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
+    curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
+    curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
   }
 
   if(timer0 > interval){
@@ -152,6 +154,12 @@ void applyPins(){
 void applyServo(){
 
   gainServoORANGE.write(curChannel.getGain());
+  volServoORANGE.write(curChannel.getVolume());
+  toneServoORANGE.write(curChannel.getTone());
+
+  gainServoPIHRANA.write(curChannel.getGain());
+  volServoPIHRANA.write(curChannel.getVolume());
+  toneServoPIHRANA.write(curChannel.getTone());
   //Serial.println(curChannel.getGain());
 
 }
@@ -187,10 +195,42 @@ void moveSlidePots(){
     digitalWrite(curChannel.gainMotorRPin,0);
     //Serial.println("N");
   }
+
+  if (analogRead(curChannel.tonePotPin)/5.68 > curChannel.getTone() + slidePotOffset){
+    //Serial.println("L");
+    digitalWrite(curChannel.toneMotorLPin,1);
+    digitalWrite(curChannel.toneMotorRPin,0);
+  } else if (analogRead(curChannel.tonePotPin)/5.68 < curChannel.getTone() - slidePotOffset){
+    digitalWrite(curChannel.toneMotorLPin,0);
+    digitalWrite(curChannel.toneMotorRPin,1);
+    //Serial.println("R");
+  } else {
+    digitalWrite(curChannel.toneMotorLPin,0);
+    digitalWrite(curChannel.toneMotorRPin,0);
+    //Serial.println("N");
+  }
+
+  if (analogRead(curChannel.volPotPin)/5.68 > curChannel.getVolume() + slidePotOffset){
+    //Serial.println("L");
+    digitalWrite(curChannel.volMotorLPin,1);
+    digitalWrite(curChannel.volMotorRPin,0);
+  } else if (analogRead(curChannel.volPotPin)/5.68 < curChannel.getVolume() - slidePotOffset){
+    digitalWrite(curChannel.volMotorLPin,0);
+    digitalWrite(curChannel.volMotorRPin,1);
+    //Serial.println("R");
+  } else {
+    digitalWrite(curChannel.volMotorLPin,0);
+    digitalWrite(curChannel.volMotorRPin,0);
+    //Serial.println("N");
+  }
 }
 void freezeSlidePots(){
     digitalWrite(curChannel.gainMotorLPin,0);
     digitalWrite(curChannel.gainMotorRPin,0);
+    digitalWrite(curChannel.toneMotorLPin,0);
+    digitalWrite(curChannel.toneMotorRPin,0);
+    digitalWrite(curChannel.volMotorLPin,0);
+    digitalWrite(curChannel.volMotorRPin,0);
 }
 
 void setChannel(int channel){
