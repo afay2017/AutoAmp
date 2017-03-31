@@ -34,8 +34,10 @@
 void setup() {
   // put your setup code here, to run once:
   curChannel = new AmpChannel((int)1);
+
   channel1 = new AmpChannel(1);
   channel2 = new AmpChannel(2);
+  channel3 = new AmpChannel(3);
 
   channel1.setHead(curChannel.ORANGE);
   channel2.setHead(curChannel.CRUNCH);
@@ -48,6 +50,8 @@ void setup() {
 
   channel1.setGain(5);
   channel2.setGain(100);
+
+  AmpChannel channels [] = {channel1,channel2,channel3};
 
 
   for (int i = 0; i < 55; i++) {
@@ -237,21 +241,30 @@ void setChannel(int channel){
   Serial.println(channel);
   switch (channel){
   case 1:
-    if (curChannel.getAmpChannelNumber() != channel1.getAmpChannelNumber()){
-      channel2 = curChannel;
+    if (curChannel.getAmpChannelNumber() != channel[0].getAmpChannelNumber()){
+      channel[curChannel.getAmpChannelNumber()-1] = curChannel;
       timer0 = 0;
       moving = true;
     }
-    curChannel = channel1;
+    curChannel = channel[0];
     applyPins();
     break;
   case 2:
-    if (curChannel.getAmpChannelNumber() != channel2.getAmpChannelNumber()){
-      channel1 = curChannel;
+    if (curChannel.getAmpChannelNumber() != channel[1].getAmpChannelNumber()){
+      channel[curChannel.getAmpChannelNumber()-1] = curChannel;
       timer0 = 0;
       moving = true;
     }
-    curChannel = channel2;
+    curChannel = channel[1];
+    applyPins();
+    break;
+  case 3:
+    if (curChannel.getAmpChannelNumber() != channel[2].getAmpChannelNumber()){
+      channel[curChannel.getAmpChannelNumber()-1] = curChannel;
+      timer0 = 0;
+      moving = true;
+    }
+    curChannel = channel[2];
     applyPins();
     break;
   }
