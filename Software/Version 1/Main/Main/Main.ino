@@ -227,6 +227,22 @@ void moveSlidePots(){
     digitalWrite(curChannel.volMotorRPin,0);
     //Serial.println("N");
   }
+
+  if (analogRead(curChannel.blendPotPin)/5.68 > curChannel.getBlend() + slidePotOffset){
+    //Serial.println("L");
+    digitalWrite(curChannel.blendMotorLPin,1);
+    digitalWrite(curChannel.blendMotorRPin,0);
+  } else if (analogRead(curChannel.blendPotPin)/5.68 < curChannel.getBlend() - slidePotOffset){
+    digitalWrite(curChannel.blendMotorLPin,0);
+    digitalWrite(curChannel.blendMotorRPin,1);
+    //Serial.println("R");
+  } else {
+    digitalWrite(curChannel.blendMotorLPin,0);
+    digitalWrite(curChannel.blendMotorRPin,0);
+    //Serial.println("N");
+  }
+
+
 }
 void freezeSlidePots(){
     digitalWrite(curChannel.gainMotorLPin,0);
@@ -235,6 +251,8 @@ void freezeSlidePots(){
     digitalWrite(curChannel.toneMotorRPin,0);
     digitalWrite(curChannel.volMotorLPin,0);
     digitalWrite(curChannel.volMotorRPin,0);
+    digitalWrite(curChannel.blendMotorLPin,0);
+    digitalWrite(curChannel.blendMotorRPin,0);
 }
 
 void setChannel(int channel){
