@@ -20,18 +20,19 @@ public:
   {
     channelnum = 1;
   }
-  AmpChannel(int channelNumber)
-  {
-    channelnum = channelNumber;
-    // pinMode(bypassPin,OUTPUT);
-    // pinMode(headPin,OUTPUT);
-    // pinMode(mesaEffectsPin,OUTPUT);
-    // pinMode(headEffectsPin,OUTPUT);
-    // pinMode(leadPin,OUTPUT);
-    // pinMode(ch2Pin,OUTPUT);
-    // pinMode(ch3Pin,OUTPUT);
-    // pinMode(soloPin,OUTPUT);
-  }
+  // AmpChannel(int channelNumber)
+  // {
+  //   channelnum = channelNumber;
+  //   // pinMode(bypassPin,OUTPUT);
+  //   // pinMode(headPin,OUTPUT);
+  //   // pinMode(mesaEffectsPin,OUTPUT);
+  //   // pinMode(headEffectsPin,OUTPUT);
+  //   // pinMode(leadPin,OUTPUT);
+  //   // pinMode(ch2Pin,OUTPUT);
+  //   // pinMode(ch3Pin,OUTPUT);
+  //   // pinMode(soloPin,OUTPUT);
+  //   setAmpChannelNumber(channelNumber);
+  // }
   void setAmpChannelNumber(int channelNumber)
   {
     if (channelNumber > 3){
