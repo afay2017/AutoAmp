@@ -2,7 +2,7 @@
 class AmpChannel
 {
 private:
-  int channelnum;
+
   int head;
   bool lead;
   bool mesaEffects;
@@ -15,20 +15,44 @@ private:
   double volume;
 
 public:
+  int channel;
+  AmpChannel();
+  AmpChannel(int channelNumber);
+  void setAmpChannelNumber(int channelNumber);
+  int getAmpChannelNumber();
+  void setMesaEffects(bool on);
+  bool getMesaEffects();
+  void setHeadEffects(bool on);
+  bool getHeadEffects();
+  void setBypass(bool on);
+  bool getBypass();
+  int getBypassInt();
+  void incHead();
+  void setHead(int head);
+  int getHead();
+  void setGain(double value);
+  double getGain();
+  void setBlend(double value);
+  double getBlend();
+  void setTone(double value);
+  double getTone();
+  void setVolume(double value);
+  double getVolume();
+
 
   AmpChannel()
   {
-    channelnum = 1;
+    this->channel = 1;
   }
   AmpChannel(int channelNumber)
   {
-    channelnum = channelNumber;
+      this->channel = channelNumber;
     // pinMode(bypassPin,OUTPUT);
     // pinMode(headPin,OUTPUT);
     // pinMode(mesaEffectsPin,OUTPUT);
     // pinMode(headEffectsPin,OUTPUT);
     // pinMode(leadPin,OUTPUT);
-    // pinMode(ch2Pin,OUTPUT);
+    // pinMoSde(ch2Pin,OUTPUT);
     // pinMode(ch3Pin,OUTPUT);
     // pinMode(soloPin,OUTPUT);
   }
@@ -39,12 +63,12 @@ public:
     } else if( channelNumber < 1){
       channelNumber = 1;
     }
-   channelnum = channelNumber;
+   this->channel = channelNumber;
   }
 
   int getAmpChannelNumber()
   {
-   return channelnum;
+   return (int)channel;
   }
 
   void setMesaEffects(bool on)
