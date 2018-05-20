@@ -53,6 +53,11 @@ public:
    this->mesaEffects = on;
   }
 
+  void toggleMesaEffects()
+  {
+    this->mesaEffects = !this->mesaEffects;
+  }
+
   bool getMesaEffects()
   {
    return (bool)mesaEffects;
@@ -63,6 +68,11 @@ public:
    this->headEffects = on;
   }
 
+  void toggleHeadEffects()
+  {
+    this->headEffects = !this->headEffects;
+  }
+
   bool getHeadEffects()
   {
    return (bool)headEffects;
@@ -71,6 +81,11 @@ public:
   void setBypass(bool on)
   {
    this->bypass = on;
+  }
+
+  void toggleBypass()
+  {
+    this->bypass = !this->bypass;
   }
 
   bool getBypass()
@@ -153,6 +168,9 @@ public:
   void snapToSaved(); //Must be refreshed constnatly
   void setPointReached();
 
+
+
+
   int bypassPin = 25;
   int headPin = 24;
   int mesaEffectsPin = 23;
@@ -171,25 +189,33 @@ public:
   int toneServoPinPIHRANA = 6;
 
   int gainPotPin = A1;
-  int volPotPin = A2;
-  int tonePotPin = A3;
+  int volPotPin = A3;
+  int tonePotPin = A2;
   int blendPotPin = A4;
 
-  int gainMotorLPin = 45;
-  int gainMotorRPin = 44;
+  int blendMotorLPin = 44;
+  int blendMotorRPin = 45;
 
-  int volMotorLPin = 43;
-  int volMotorRPin = 42;
+  int volMotorLPin = 42;
+  int volMotorRPin = 43;
 
-  int toneMotorLPin = 41;
-  int toneMotorRPin = 40;
+  int toneMotorLPin = 40;
+  int toneMotorRPin = 46;
 
-  int blendMotorLPin = 39;
-  int blendMotorRPin = 38;
+  int gainMotorLPin = 38;
+  int gainMotorRPin = 39;
 
-  int ampSwitchPin = -1;
-  int mesaEffectsSwitchPin = -1;
-  int headEffectsSwitchPin = -1;
+  int headLEDPin = 30;
+  int mesaEffectsLEDPin = 31;
+  int headEffectsLEDPin = 32;
+  int bypassLEDPin = 33;
+
+  int ampSwitchPin = 34;
+  int mesaEffectsSwitchPin = 35;
+  int headEffectsSwitchPin = 36;
+  int cycleChannelSwitchPin = 37;
+
+
 
 };
 

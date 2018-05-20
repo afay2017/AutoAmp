@@ -31,106 +31,11 @@
  int bypassSwitchPin;
 
  int ampSwitchState;
+ int cycleChannelSwitchState;
  int mesaEffectsSwitchState;
  int headEffectsSwitchState;
 
-void setup() {
 
-   channel1.setAmpChannelNumber(1);
-   channel2.setAmpChannelNumber(2);
-   channel3.setAmpChannelNumber(3);
-
-  channel1.setHead(curChannel.ORANGE);
-  channel2.setHead(curChannel.CRUNCH);
-
-  channel1.setMesaEffects(false);
-  channel2.setMesaEffects(false);
-
-  channel1.setHeadEffects(true);
-  channel2.setHeadEffects(true);
-
-  channel1.setGain(5);
-  channel2.setGain(100);
-
-   channels[0] = channel1;
-   channels[1] = channel2;
-   channels[2] = channel3;
-
-
-  for (int i = 0; i < 55; i++) {
-    pinMode(i,INPUT);
-  }
-
-
-   Serial.begin(9600);
-
-
-  pinMode(8,INPUT_PULLUP);
-  pinMode(9,INPUT_PULLUP);
-
-  pinMode(curChannel.headPin,OUTPUT);
-  pinMode(curChannel.bypassPin,OUTPUT);
-  pinMode(curChannel.headEffectsPin,OUTPUT);
-  pinMode(curChannel.mesaEffectsPin,OUTPUT);
-
-  pinMode(curChannel.gainPotPin,INPUT);
-
-  pinMode(curChannel.gainMotorLPin,OUTPUT);
-  pinMode(curChannel.gainMotorRPin,OUTPUT);
-
-  pinMode(curChannel.ampSwitchPin,INPUT);
-  pinMode(curChannel.mesaEffectsPin,INPUT);
-  pinMode(curChannel.mesaEffectsPin,INPUT);
-
-
-  gainServoORANGE.attach(curChannel.gainServoPinORANGE);
-  volServoORANGE.attach(curChannel.volServoPinORANGE);
-  toneServoORANGE.attach(curChannel.toneServoPinORANGE);
-
-  gainServoPIHRANA.attach(curChannel.gainServoPinPIHRANA);
-  volServoPIHRANA.attach(curChannel.volServoPinPIHRANA);
-  toneServoPIHRANA.attach(curChannel.toneServoPinPIHRANA);
-
-  timer0 = 0;
-
-  slidePotOffset = 1;
-  Serial.println("OFF");
-}
-
- void loop() {
-
-   if(digitalRead(8) == 1){
-     setChannel(1);
-   } else {
-     setChannel(2);
-   }
-
-
-
-
- freezeSlidePots();
-//
-  if (moving){
-    moveSlidePots();
-  } else {
-    freezeSlidePots();
-    curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
-    curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
-    curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
-  }
-  Serial.println(curChannel.getGain());
-  Serial.println(analogRead(curChannel.gainPotPin)/5.68);
-  Serial.println(curChannel.getAmpChannelNumber());
-  if(timer0 > interval){
-    timer0 = 0;
-    moving = false;
-  }
-
-
-  //Serial.println(digitalRead(8));
-  //Serial.println(analogRead(curChannel.gainPotPin)/5.68);
-  applyServo();
- }
 //
 void applyPins(){
   //digitalWrite(curChannel.bypassPin,curChannel.getBypassInt());
@@ -139,22 +44,37 @@ void applyPins(){
     case curChannel.ORANGE:
     digitalWrite(curChannel.headPin, LOW);
     //Serial.println("ORANGE");
+    digitalWrite(curChannel.headLEDPin, HIGH);
     break;
 
     case curChannel.CRUNCH:
     digitalWrite(curChannel.headPin, HIGH);
     digitalWrite(curChannel.leadPin, LOW);
     //Serial.println("CRUNCH");
+    digitalWrite(curChannel.headLEDPin, LOW);
     break;
 
     case curChannel.LEAD:
     digitalWrite(curChannel.headPin, HIGH);
     digitalWrite(curChannel.leadPin, HIGH);
+    digitalWrite(curChannel.headLEDPin, LOW);
     break;
   }
 
-  digitalWrite(curChannel.headEffectsPin,curChannel.getHeadEffects());
+  if(curChannel.getHeadEffects()){
+    digitalWrite(curChannel.headEffectsLEDPin,LOW);
+  } else {
+    digitalWrite(curChannel.headEffectsLEDPin,HIGH);
+  }
+  if(curChannel.getMesaEffects()){
+    digitalWrite(curChannel.mesaEffectsLEDPin,LOW);
+  } else {
+    digitalWrite(curChannel.mesaEffectsLEDPin,HIGH);
+  }
+  digitalWrite(curChannel.headEffectsPin,curChannel.getMesaEffects());
   digitalWrite(curChannel.mesaEffectsPin,curChannel.getMesaEffects());
+  digitalWrite(curChannel.headEffectsLEDPin,curChannel.getHeadEffects());
+  digitalWrite(curChannel.mesaEffectsLEDPin,curChannel.getMesaEffects());
 
 //  applyMesaChannelPins(curChannel.getAmpChannelNumber());
 
@@ -198,6 +118,7 @@ void moveSlidePots(){
     digitalWrite(curChannel.gainMotorLPin,1);
     digitalWrite(curChannel.gainMotorRPin,0);
   } else if (analogRead(curChannel.gainPotPin)/5.68 < curChannel.getGain() - slidePotOffset){
+
     digitalWrite(curChannel.gainMotorLPin,0);
     digitalWrite(curChannel.gainMotorRPin,1);
     //Serial.println("R");
@@ -247,7 +168,7 @@ void moveSlidePots(){
     digitalWrite(curChannel.blendMotorLPin,0);
     digitalWrite(curChannel.blendMotorRPin,0);
     //Serial.println("N");
-  }
+   }
 
 
 }
@@ -263,66 +184,233 @@ void freezeSlidePots(){
 }
 
 void setChannel(int channel){
-  Serial.println(channel);
-  switch (channel){
-  case 1:
-    if (curChannel.getAmpChannelNumber() != channels[0].getAmpChannelNumber()){
-      curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
-      curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
-      curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
-      channels[curChannel.getAmpChannelNumber()-1] = curChannel;
-      timer0 = 0;
-      moving = true;
-    }
-    curChannel = channels[0];
-    applyPins();
-    break;
-  case 2:
-    if (curChannel.getAmpChannelNumber() != channels[1].getAmpChannelNumber()){
-      curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
-      curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
-      curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
-      channels[curChannel.getAmpChannelNumber()-1] = curChannel;
-      timer0 = 0;
-      moving = true;
-    }
-    curChannel = channels[1];
-    applyPins();
-    break;
-  case 3:
-    if (curChannel.getAmpChannelNumber() != channels[2].getAmpChannelNumber()){
-      curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
-      curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
-      curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
-      channels[curChannel.getAmpChannelNumber()-1] = curChannel;
-      timer0 = 0;
-      moving = true;
-    }
-    curChannel = channels[2];
-    applyPins();
-    break;
+  //Serial.println(channel);
+  //switch (channel){
+  //case 1:
+  if (channel < 0 || channel > 3){
+    channel = 1;
   }
+  if (curChannel.getAmpChannelNumber() != channels[channel-1].getAmpChannelNumber()){
+    curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
+    curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
+    curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
+    channels[curChannel.getAmpChannelNumber()-1] = curChannel;
+    timer0 = 0;
+    moving = true;
+  }
+  curChannel = channels[channel-1];
+  applyPins();
+
+  // case 2:
+  //   if (curChannel.getAmpChannelNumber() != channels[1].getAmpChannelNumber()){
+  //     curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
+  //     curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
+  //     curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
+  //     channels[curChannel.getAmpChannelNumber()-1] = curChannel;
+  //     timer0 = 0;
+  //     moving = true;
+  //   }
+  //   curChannel = channels[1];
+  //   applyPins();
+  //   break;
+  // case 3:
+  //   if (curChannel.getAmpChannelNumber() != channels[2].getAmpChannelNumber()){
+  //     curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
+  //     curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
+  //     curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
+  //     channels[curChannel.getAmpChannelNumber()-1] = curChannel;
+  //     timer0 = 0;
+  //     moving = true;
+  //   }
+  //   curChannel = channels[2];
+  //   applyPins();
+  //   break;
+  //}
 }
-//
-//   void checkSwitches(){
-//     if(digitalRead(curChannel.ampSwitchPin)==1 && ampSwitchState != 1){
-//         ampSwitchState = 1;
-//         curChannel.incHead();
-//     } else if(digitalRead(curChannel.ampSwitchPin) == 0){
-//       ampSwitchState = 0;
-//     }
-//
-//     if(digitalRead(curChannel.headEffectsSwitchPin)==1 && headEffectsSwitchState != 1){
-//         ampSwitchState = 1;
-//         curChannel.incHead();
-//     } else if(digitalRead(curChannel.headEffectsSwitchPin) == 0){
-//       ampSwitchState = 0;
-//     }
-//
-//     if(digitalRead(curChannel.mesaEffectsSwitchPin)==1 && mesaEffectsSwitchState != 1){
-//         ampSwitchState = 1;
-//         curChannel.incHead();
-//     } else if(digitalRead(curChannel.mesaEffectsSwitchPin) == 0){
-//       ampSwitchState = 0;
-//     }
-//   }
+
+  void checkSwitches(){
+
+    if(digitalRead(curChannel.ampSwitchPin)==1 && ampSwitchState != 1){
+        ampSwitchState = 1;
+        curChannel.incHead();
+    } else if(digitalRead(curChannel.ampSwitchPin) == 0){
+      ampSwitchState = 0;
+    }
+
+    if(digitalRead(curChannel.cycleChannelSwitchPin)==1 && cycleChannelSwitchState != 1){
+        cycleChannelSwitchState = 1;
+        setChannel(curChannel.getAmpChannelNumber()+1);
+    } else if(digitalRead(curChannel.cycleChannelSwitchPin) == 0){
+      cycleChannelSwitchState = 0;
+    }
+
+    if(digitalRead(curChannel.headEffectsSwitchPin)==1 && headEffectsSwitchState != 1){
+        headEffectsSwitchState = 1;
+        curChannel.toggleHeadEffects();
+    } else if(digitalRead(curChannel.headEffectsSwitchPin) == 0){
+      headEffectsSwitchState = 0;
+    }
+
+    if(digitalRead(curChannel.mesaEffectsSwitchPin)==1 && mesaEffectsSwitchState != 1){
+        mesaEffectsSwitchState = 1;
+        curChannel.toggleMesaEffects();
+    } else if(digitalRead(curChannel.mesaEffectsSwitchPin) == 0){
+      mesaEffectsSwitchState = 0;
+    } 
+  }
+
+  void setup() {
+
+     ampSwitchState = 0;
+     cycleChannelSwitchState = 0;
+     mesaEffectsSwitchState = 0;
+     headEffectsSwitchState = 0;
+
+     channel1.setAmpChannelNumber(1);
+     channel2.setAmpChannelNumber(2);
+     channel3.setAmpChannelNumber(3);
+
+    channel1.setHead(curChannel.ORANGE);
+    channel2.setHead(curChannel.CRUNCH);
+
+    channel1.setMesaEffects(false);
+    channel2.setMesaEffects(false);
+
+    channel1.setHeadEffects(true);
+    channel2.setHeadEffects(true);
+
+    channel1.setGain(5);
+    channel2.setGain(100);
+
+     channels[0] = channel1;
+     channels[1] = channel2;
+     channels[2] = channel3;
+
+
+    for (int i = 0; i < 55; i++) {
+      pinMode(i,INPUT);
+    }
+
+
+     Serial.begin(9600);
+
+
+    pinMode(8,INPUT_PULLUP);
+    pinMode(9,INPUT_PULLUP);
+
+    pinMode(curChannel.headPin,OUTPUT);
+    pinMode(curChannel.bypassPin,OUTPUT);
+    pinMode(curChannel.headEffectsPin,OUTPUT);
+    pinMode(curChannel.mesaEffectsPin,OUTPUT);
+
+    pinMode(curChannel.gainPotPin,INPUT);
+
+    pinMode(curChannel.gainMotorLPin,OUTPUT);
+    pinMode(curChannel.gainMotorRPin,OUTPUT);
+
+    pinMode(curChannel.toneMotorLPin,OUTPUT);
+    pinMode(curChannel.toneMotorRPin,OUTPUT);
+
+    pinMode(curChannel.volMotorLPin,OUTPUT);
+    pinMode(curChannel.volMotorRPin,OUTPUT);
+
+    pinMode(curChannel.blendMotorLPin,OUTPUT);
+    pinMode(curChannel.blendMotorRPin,OUTPUT);
+
+    pinMode(curChannel.ampSwitchPin,INPUT);
+    pinMode(curChannel.headEffectsSwitchPin,INPUT);
+    pinMode(curChannel.mesaEffectsSwitchPin,INPUT);
+    pinMode(curChannel.cycleChannelSwitchPin, INPUT);
+
+    pinMode(curChannel.headLEDPin,OUTPUT);
+    pinMode(curChannel.headEffectsLEDPin,OUTPUT);
+    pinMode(curChannel.mesaEffectsLEDPin,OUTPUT);
+    pinMode(curChannel.bypassLEDPin, OUTPUT);
+
+
+    gainServoORANGE.attach(curChannel.gainServoPinORANGE);
+    volServoORANGE.attach(curChannel.volServoPinORANGE);
+    toneServoORANGE.attach(curChannel.toneServoPinORANGE);
+
+    gainServoPIHRANA.attach(curChannel.gainServoPinPIHRANA);
+    volServoPIHRANA.attach(curChannel.volServoPinPIHRANA);
+    toneServoPIHRANA.attach(curChannel.toneServoPinPIHRANA);
+
+    timer0 = 0;
+
+    slidePotOffset = 50;
+
+
+    Serial.println("OFF");
+  }
+
+   void loop() {
+
+     // if(digitalRead(9) == 1){
+     //   setChannel(1);
+     // } else {
+     //   setChannel(2);
+     // }
+
+
+
+
+   freezeSlidePots();
+
+  // channels[0].setGain(20);
+  // channels[0].setVolume(20);
+  // channels[0].setTone(20);
+  // channels[0].setBlend(20);
+  //
+  // channels[1].setGain(120);
+  // channels[1].setVolume(120);
+  // channels[1].setTone(120);
+  // channels[1].setBlend(120);
+  //
+  // channels[2].setGain(20);
+  // channels[2].setVolume(20);
+  // channels[2].setTone(20);
+  // channels[2].setBlend(20);
+
+    if (moving){
+      moveSlidePots();
+    } else {
+      freezeSlidePots();
+      curChannel.setGain(analogRead(curChannel.gainPotPin)/5.68 );
+      curChannel.setVolume(analogRead(curChannel.volPotPin)/5.68 );
+      curChannel.setTone(analogRead(curChannel.tonePotPin)/5.68 );
+      curChannel.setBlend(analogRead(curChannel.tonePotPin)/5.68 );
+    }
+
+
+
+    // Serial.print("Gain: ");
+    // Serial.print(analogRead(curChannel.gainPotPin)/5.68);
+    // Serial.print(" Tone: ");
+    // Serial.print(analogRead(curChannel.tonePotPin)/5.68);
+    // Serial.print(" Vol: ");
+    // Serial.print(analogRead(curChannel.volPotPin)/5.68);
+    // Serial.print(" Blend: ");
+
+
+    //Serial.print("Gain: ");
+  //  Serial.print(curChannel.getHeadEffects());
+
+
+    // Serial.println(analogRead(curChannel.blendPotPin)/5.68);
+    //Serial.print(curChannel.getAmpChannelNumber());
+    //Serial.print(digitalRead(curChannel.cycleChannelSwitchPin));
+    if(timer0 > interval){
+      timer0 = 0;
+      moving = false;
+    }
+
+
+    Serial.print(digitalRead(curChannel.ampSwitchPin));
+    Serial.print(digitalRead(curChannel.headEffectsSwitchPin));
+    Serial.print(digitalRead(curChannel.mesaEffectsSwitchPin));
+    Serial.println(digitalRead(curChannel.cycleChannelSwitchPin));
+    //Serial.println(analogRead(curChannel.gainPotPin)/5.68);
+    applyServo();
+    checkSwitches();
+   }
