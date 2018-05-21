@@ -33,6 +33,11 @@ public:
   //   // pinMode(soloPin,OUTPUT);
   //   setAmpChannelNumber(channelNumber);
   // }
+
+  // byte[] toByteArray(){
+  //   byte[] = new
+  // }
+
   void setAmpChannelNumber(int channelNumber)
   {
     if (channelNumber > 3){

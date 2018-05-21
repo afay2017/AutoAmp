@@ -2,6 +2,7 @@
     #include <AmpChannel.cpp>
     #include <Servo.h>
     #include <elapsedMillis.h>
+    #include <EEPROM.h>
 
     elapsedMillis timer0;
 
@@ -12,7 +13,7 @@
  AmpChannel channel1;
  AmpChannel channel2;
  AmpChannel channel3;
-
+// int numOfChannels = 3;
  AmpChannel channels[3];
 
  Servo gainServoORANGE;
@@ -30,12 +31,64 @@
  int ch23SwitchPin;
  int bypassSwitchPin;
 
+ int saveState;
  int ampSwitchState;
  int cycleChannelSwitchState;
  int mesaEffectsSwitchState;
  int headEffectsSwitchState;
 
+struct savedSettings {
+  int channelnum;
+  int mesachannel;
+  int gain;
+  int vol;
+  int blend;
+  int tone;
+  bool mesaEffects;
+  bool headEffects;
+  int head;
+};
 
+void writeToEEPROM(){
+  int eeAddress = 0;
+  savedSettings settings[3];
+  for (int i = 0; i < 3; i++){
+    settings[i].channelnum  = channels[i].getAmpChannelNumber();
+    settings[i].mesachannel = channels[i].getAmpChannelNumber();
+    settings[i].gain        = channels[i].getGain();
+    settings[i].tone        = channels[i].getTone();
+    settings[i].vol         = channels[i].getVolume();
+    settings[i].blend       = channels[i].getBlend();
+    settings[i].mesaEffects = channels[i].getMesaEffects();
+    settings[i].headEffects = channels[i].getHeadEffects();
+    settings[i].head        = channels[i].getHead();
+  }
+  for (int i = 0; i < 3; i++){
+      Serial.println(settings[i].gain);
+      EEPROM.put(eeAddress,settings[i]);
+      eeAddress += sizeof(savedSettings);
+    }
+}
+
+void readFromEEPROM(){
+  int eeAddress = 0;
+  savedSettings settings[3];
+  for (int i = 0; i < 3; i++){
+    EEPROM.get(eeAddress,settings[i]);
+    eeAddress += sizeof(savedSettings);
+  }
+  for (int i = 0; i < 3; i++){
+    Serial.println(settings[i].gain);
+    // channels[i].setAmpChannelNumber(settings[i].channelnum);
+    // channels[i].setGain(settings[i].gain);
+    // channels[i].setTone(settings[i].tone);
+    // channels[i].setVolume(settings[i].vol);
+    // channels[i].setBlend(settings[i].blend);
+    // channels[i].setMesaEffects(settings[i].mesaEffects);
+    // channels[i].setHeadEffects(settings[i].headEffects);
+    // channels[i].setHead(settings[i].head);
+  }
+}
 //
 void applyPins(){
   //digitalWrite(curChannel.bypassPin,curChannel.getBypassInt());
@@ -61,22 +114,12 @@ void applyPins(){
     break;
   }
 
-  if(curChannel.getHeadEffects()){
-    digitalWrite(curChannel.headEffectsLEDPin,LOW);
-  } else {
-    digitalWrite(curChannel.headEffectsLEDPin,HIGH);
-  }
-  if(curChannel.getMesaEffects()){
-    digitalWrite(curChannel.mesaEffectsLEDPin,LOW);
-  } else {
-    digitalWrite(curChannel.mesaEffectsLEDPin,HIGH);
-  }
   digitalWrite(curChannel.headEffectsPin,curChannel.getMesaEffects());
   digitalWrite(curChannel.mesaEffectsPin,curChannel.getMesaEffects());
   digitalWrite(curChannel.headEffectsLEDPin,curChannel.getHeadEffects());
   digitalWrite(curChannel.mesaEffectsLEDPin,curChannel.getMesaEffects());
 
-//  applyMesaChannelPins(curChannel.getAmpChannelNumber());
+  applyMesaChannelPins(curChannel.getAmpChannelNumber());
 
 
 
@@ -90,28 +133,37 @@ void applyServo(){
 
   gainServoPIHRANA.write(curChannel.getGain());
   volServoPIHRANA.write(curChannel.getVolume());
-  toneServoPIHRANA.write(curChannel.getTone());
+  // toneServoPIHRANA.write(curChannel.getTone());
+
   //Serial.println(curChannel.getGain());
 
 }
-//
-// void applyMesaChannelPins(int channel){
-//   switch (channel){
-//     case 1:
-//     digitalWrite(curChannel.ch2Pin,LOW);
-//     digitalWrite(curChannel.ch3Pin,LOW);
-//     break;
-//     case 2:
-//     digitalWrite(curChannel.ch2Pin,HIGH);
-//     digitalWrite(curChannel.ch3Pin,LOW);
-//     break;
-//     case 3:
-//     digitalWrite(curChannel.ch2Pin,LOW);
-//     digitalWrite(curChannel.ch3Pin,HIGH);
-//     break;
-//   }
-// }
-//
+
+void applyMesaChannelPins(int channel){
+  switch (channel){
+    case 1:
+    digitalWrite(curChannel.ch2Pin,LOW);
+    digitalWrite(curChannel.ch3Pin,LOW);
+    break;
+    case 2:
+    digitalWrite(curChannel.ch2Pin,HIGH);
+    digitalWrite(curChannel.ch3Pin,LOW);
+    break;
+    case 3:
+    digitalWrite(curChannel.ch2Pin,LOW);
+    digitalWrite(curChannel.ch3Pin,HIGH);
+    break;
+  }
+}
+
+void applyMesaSolo(bool solo){
+  if(solo){
+    digitalWrite(curChannel.soloPin,HIGH);
+  } else {
+    digitalWrite(curChannel.soloPin,LOW);
+  }
+}
+
 void moveSlidePots(){
   if (analogRead(curChannel.gainPotPin)/5.68 > curChannel.getGain() + slidePotOffset){
     //Serial.println("L");
@@ -230,9 +282,16 @@ void setChannel(int channel){
 
   void checkSwitches(){
 
+    if (digitalRead(curChannel.mesaEffectsSwitchPin)==1 && digitalRead(curChannel.headEffectsSwitchPin)==1 && saveState != 1){
+      writeToEEPROM();
+    } else if(digitalRead(curChannel.mesaEffectsSwitchPin)==0 || digitalRead(curChannel.headEffectsSwitchPin)==0){
+      saveState = 0;
+    }
+
     if(digitalRead(curChannel.ampSwitchPin)==1 && ampSwitchState != 1){
         ampSwitchState = 1;
         curChannel.incHead();
+        applyPins();
     } else if(digitalRead(curChannel.ampSwitchPin) == 0){
       ampSwitchState = 0;
     }
@@ -240,6 +299,7 @@ void setChannel(int channel){
     if(digitalRead(curChannel.cycleChannelSwitchPin)==1 && cycleChannelSwitchState != 1){
         cycleChannelSwitchState = 1;
         setChannel(curChannel.getAmpChannelNumber()+1);
+        applyPins();
     } else if(digitalRead(curChannel.cycleChannelSwitchPin) == 0){
       cycleChannelSwitchState = 0;
     }
@@ -247,6 +307,7 @@ void setChannel(int channel){
     if(digitalRead(curChannel.headEffectsSwitchPin)==1 && headEffectsSwitchState != 1){
         headEffectsSwitchState = 1;
         curChannel.toggleHeadEffects();
+        applyPins();
     } else if(digitalRead(curChannel.headEffectsSwitchPin) == 0){
       headEffectsSwitchState = 0;
     }
@@ -254,9 +315,12 @@ void setChannel(int channel){
     if(digitalRead(curChannel.mesaEffectsSwitchPin)==1 && mesaEffectsSwitchState != 1){
         mesaEffectsSwitchState = 1;
         curChannel.toggleMesaEffects();
+        applyPins();
     } else if(digitalRead(curChannel.mesaEffectsSwitchPin) == 0){
       mesaEffectsSwitchState = 0;
-    } 
+    }
+
+
   }
 
   void setup() {
@@ -341,7 +405,7 @@ void setChannel(int channel){
     slidePotOffset = 50;
 
 
-    Serial.println("OFF");
+    readFromEEPROM();
   }
 
    void loop() {
@@ -406,10 +470,12 @@ void setChannel(int channel){
     }
 
 
-    Serial.print(digitalRead(curChannel.ampSwitchPin));
-    Serial.print(digitalRead(curChannel.headEffectsSwitchPin));
-    Serial.print(digitalRead(curChannel.mesaEffectsSwitchPin));
-    Serial.println(digitalRead(curChannel.cycleChannelSwitchPin));
+    // Serial.print(curChannel.getAmpChannelNumber());
+    // Serial.print(curChannel.getHeadEffects());
+    // Serial.print(curChannel.getMesaEffects());
+    // Serial.println(curChannel.getHead());
+    //Serial.print(digitalRead(curChannel.mesaEffectsSwitchPin));
+    //Serial.println(digitalRead(curChannel.cycleChannelSwitchPin));
     //Serial.println(analogRead(curChannel.gainPotPin)/5.68);
     applyServo();
     checkSwitches();
