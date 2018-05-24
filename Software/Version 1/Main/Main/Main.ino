@@ -63,8 +63,11 @@ void writeToEEPROM(){
     settings[i].headEffects = channels[i].getHeadEffects();
     settings[i].head        = channels[i].getHead();
   }
+  Serial.println(channels[1].getGain());
+  Serial.println(settings[1].gain);
   for (int i = 0; i < 3; i++){
-      Serial.println(settings[i].gain);
+      //Serial.println(channels[i].getGain());
+      //Serial.println(settings[i].gain);
       EEPROM.put(eeAddress,settings[i]);
       eeAddress += sizeof(savedSettings);
     }
@@ -78,7 +81,7 @@ void readFromEEPROM(){
     eeAddress += sizeof(savedSettings);
   }
   for (int i = 0; i < 3; i++){
-    Serial.println(settings[i].gain);
+    //Serial.println(settings[i].gain);
     // channels[i].setAmpChannelNumber(settings[i].channelnum);
     // channels[i].setGain(settings[i].gain);
     // channels[i].setTone(settings[i].tone);
@@ -166,18 +169,18 @@ void applyMesaSolo(bool solo){
 
 void moveSlidePots(){
   if (analogRead(curChannel.gainPotPin)/5.68 > curChannel.getGain() + slidePotOffset){
-    //Serial.println("L");
+    Serial.println("L");
     digitalWrite(curChannel.gainMotorLPin,1);
     digitalWrite(curChannel.gainMotorRPin,0);
   } else if (analogRead(curChannel.gainPotPin)/5.68 < curChannel.getGain() - slidePotOffset){
 
     digitalWrite(curChannel.gainMotorLPin,0);
     digitalWrite(curChannel.gainMotorRPin,1);
-    //Serial.println("R");
+    Serial.println("R");
   } else {
     digitalWrite(curChannel.gainMotorLPin,0);
     digitalWrite(curChannel.gainMotorRPin,0);
-    //Serial.println("N");
+    Serial.println("N");
   }
 
   if (analogRead(curChannel.tonePotPin)/5.68 > curChannel.getTone() + slidePotOffset){
@@ -419,8 +422,6 @@ void setChannel(int channel){
 
 
 
-   freezeSlidePots();
-
   // channels[0].setGain(20);
   // channels[0].setVolume(20);
   // channels[0].setTone(20);
@@ -449,7 +450,7 @@ void setChannel(int channel){
 
 
     // Serial.print("Gain: ");
-    // Serial.print(analogRead(curChannel.gainPotPin)/5.68);
+  //   Serial.println(analogRead(curChannel.gainPotPin)/5.68);
     // Serial.print(" Tone: ");
     // Serial.print(analogRead(curChannel.tonePotPin)/5.68);
     // Serial.print(" Vol: ");
