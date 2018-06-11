@@ -175,6 +175,14 @@ public:
 
 
 
+  int footAmpPin = 12;
+  int footSoloPin = 11;
+  int footFXPin = 10;
+  int foot2and3Pin = 9;
+  int foot1and2Pin = 8;
+
+  int footCh1LED = 48;
+  int footCh2orCh3LED = 49;
 
   int bypassPin = 25;
   int headPin = 24;

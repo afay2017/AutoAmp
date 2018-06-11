@@ -92,7 +92,23 @@ void readFromEEPROM(){
     // channels[i].setHead(settings[i].head);
   }
 }
-//
+
+void applyFootSwitchLED(int channel){
+  switch (channel) {
+    case 1:
+      digitalWrite(curChannel.footCh1LED,HIGH);
+      break;
+    case 2:
+      digitalWrite(curChannel.footCh1LED,LOW);
+      digitalWrite(curChannel.footCh2orCh3LED,LOW);
+      break;
+    case 3:
+        digitalWrite(curChannel.footCh1LED,LOW);
+        digitalWrite(curChannel.footCh2orCh3LED,HIGH);
+        break;
+      }
+}
+
 void applyPins(){
   //digitalWrite(curChannel.bypassPin,curChannel.getBypassInt());
   //Serial.println(curChannel.getHead());
@@ -122,7 +138,9 @@ void applyPins(){
   digitalWrite(curChannel.headEffectsLEDPin,curChannel.getHeadEffects());
   digitalWrite(curChannel.mesaEffectsLEDPin,curChannel.getMesaEffects());
 
+
   applyMesaChannelPins(curChannel.getAmpChannelNumber());
+  applyFootSwitchLED(curChannel.getAmpChannelNumber());
 
 
 
@@ -136,7 +154,7 @@ void applyServo(){
 
   gainServoPIHRANA.write(curChannel.getGain());
   volServoPIHRANA.write(curChannel.getVolume());
-  // toneServoPIHRANA.write(curChannel.getTone());
+  toneServoPIHRANA.write(curChannel.getTone());
 
   //Serial.println(curChannel.getGain());
 
@@ -284,6 +302,14 @@ void setChannel(int channel){
 }
 
   void checkSwitches(){
+    //FootSwitch
+    if (digitalRead(curChannel.foot1and2Pin)==1 && digitalRead(curChannel.foot2and3Pin)==0){
+      setChannel(1);
+    } else if (digitalRead(curChannel.foot1and2Pin)==1 && digitalRead(curChannel.foot2and3Pin)==1){
+      setChannel(2);
+    } else if (digitalRead(curChannel.foot1and2Pin)==0 && digitalRead(curChannel.foot2and3Pin)==1){
+      setChannel(3);
+    }
 
     if (digitalRead(curChannel.mesaEffectsSwitchPin)==1 && digitalRead(curChannel.headEffectsSwitchPin)==1 && saveState != 1){
       writeToEEPROM();
@@ -323,6 +349,8 @@ void setChannel(int channel){
       mesaEffectsSwitchState = 0;
     }
 
+    digitalWrite(curChannel.bypassPin,digitalRead(curChannel.footAmpPin));
+    Serial.println(digitalRead(curChannel.footAmpPin));
 
   }
 
@@ -364,6 +392,15 @@ void setChannel(int channel){
 
     pinMode(8,INPUT_PULLUP);
     pinMode(9,INPUT_PULLUP);
+
+    pinMode(curChannel.footAmpPin,INPUT);
+    pinMode(curChannel.footSoloPin, INPUT);
+    pinMode(curChannel.footFXPin, INPUT);
+    pinMode(curChannel.foot2and3Pin, INPUT);
+    pinMode(curChannel.foot1and2Pin, INPUT);
+
+    pinMode(curChannel.footCh1LED, OUTPUT);
+    pinMode(curChannel.footCh2orCh3LED, OUTPUT);
 
     pinMode(curChannel.headPin,OUTPUT);
     pinMode(curChannel.bypassPin,OUTPUT);
@@ -449,12 +486,12 @@ void setChannel(int channel){
 
 
 
-    // Serial.print("Gain: ");
-  //   Serial.println(analogRead(curChannel.gainPotPin)/5.68);
-    // Serial.print(" Tone: ");
-    // Serial.print(analogRead(curChannel.tonePotPin)/5.68);
-    // Serial.print(" Vol: ");
-    // Serial.print(analogRead(curChannel.volPotPin)/5.68);
+    Serial.print("Gain: ");
+    Serial.print(analogRead(curChannel.gainPotPin)/5.68);
+    Serial.print(" Tone: ");
+    Serial.print(analogRead(curChannel.tonePotPin)/5.68);
+    Serial.print(" Vol: ");
+    Serial.println(analogRead(curChannel.volPotPin)/5.68);
     // Serial.print(" Blend: ");
 
 
@@ -471,13 +508,14 @@ void setChannel(int channel){
     }
 
 
-    // Serial.print(curChannel.getAmpChannelNumber());
-    // Serial.print(curChannel.getHeadEffects());
-    // Serial.print(curChannel.getMesaEffects());
-    // Serial.println(curChannel.getHead());
-    //Serial.print(digitalRead(curChannel.mesaEffectsSwitchPin));
-    //Serial.println(digitalRead(curChannel.cycleChannelSwitchPin));
-    //Serial.println(analogRead(curChannel.gainPotPin)/5.68);
+     // Serial.print(digitalRead(curChannel.footAmpPin));
+     // Serial.print(digitalRead(curChannel.footSoloPin));
+     // Serial.print(digitalRead(curChannel.footFXPin));
+     // Serial.print(digitalRead(curChannel.foot2and3Pin));
+     // Serial.println(digitalRead(curChannel.foot1and2Pin));
+     // Serial.print(digitalRead(curChannel.mesaEffectsSwitchPin));
+     // Serial.println(digitalRead(curChannel.cycleChannelSwitchPin));
+     // Serial.println(analogRead(curChannel.gainPotPin)/5.68);
     applyServo();
     checkSwitches();
    }
